@@ -77,25 +77,29 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', htmlElement);
   });
 };
-displayMovements(account1.movements);
+// displayMovements(account1.movements);
 
 const calcDisplayBalcance = function (movements) {
   const balance = movements.reduce((acc, mov) => acc + mov, 0);
   labelBalance.textContent = `${balance}€`;
 };
-calcDisplayBalcance(account1.movements);
+// calcDisplayBalcance(account1.movements);
 
-const calcDisplaySummary = function (arr) {
-  const incomes = arr.filter(mov => mov > 0).reduce((acc, mov) => acc + mov, 0);
+const calcDisplaySummary = function (account) {
+  const incomes = account.movements.filter(mov => mov > 0).reduce((acc, mov) => acc + mov, 0);
   labelSumIn.innerHTML = `${incomes}€`;
 
-  const out = arr.filter(mov => mov < 0).reduce((acc, mov) => acc + mov, 0);
+  const out = account.movements.filter(mov => mov < 0).reduce((acc, mov) => acc + mov, 0);
   labelSumOut.innerHTML = `${Math.abs(out)}`;
 
-  const interest = arr.filter(mov => mov > 0).map(deposit => (deposit * 1.2) / 100).filter(interest => interest >= 1).reduce((acc, interest) => acc + interest, 0);
+  const interest = account.movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * account.interestRate) / 100)
+    .filter(interest => interest >= 1)
+    .reduce((acc, interest) => acc + interest, 0);
   labelSumInterest.innerHTML = `${interest}€`
 };
-calcDisplaySummary(account1.movements);
+// calcDisplaySummary(account1.movements);
 
 const createUserNames = function (accs) {
   accs.forEach(
@@ -108,6 +112,27 @@ const createUserNames = function (accs) {
   );
 };
 createUserNames(accounts);
+let loggedInUser;
+// Event Hundlers
+btnLogin.addEventListener('click', function (e) {
+  e.preventDefault();
+  const username = inputLoginUsername.value;
+  const pass = +inputLoginPin.value;
+  loggedInUser = accounts.find(account => account.username === username);
+
+  if (loggedInUser?.pin === pass) {
+    console.log(loggedInUser);
+    labelWelcome.textContent = `Welcome back, ${loggedInUser.owner.split(' ')[0]}!`;
+    containerApp.style.opacity = 1;
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur(); //fild looses focus
+    displayMovements(loggedInUser.movements);
+    calcDisplayBalcance(loggedInUser.movements);
+    calcDisplaySummary(loggedInUser);
+  }
+  
+    
+});
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -130,3 +155,11 @@ const max = movements.reduce(
 );
 // console.log(max);
 /////////////////////////////////////////////////
+const calcAverageHumanAge = arr =>
+  arr
+    .map(age => (age <= 2 ? age * 2 : 16 + age * 4))
+    .filter(age => age >= 18)
+    .reduce((acc, age, i, arr) => acc + age / arr.length, 0);
+
+const humanAge = calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]);
+console.log(humanAge);
