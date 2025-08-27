@@ -68,15 +68,34 @@ const displayMovements = function (movements) {
     const depositType = mov > 0 ? 'deposit' : 'withdrawal';
     const htmlElement = `
     <div class="movements__row">
-      <div class="movements__type movements__type--${depositType}">${i + 1} ${depositType}</div>
-      <div class="movements__value">${mov}</div>
+      <div class="movements__type movements__type--${depositType}">${
+      i + 1
+    } ${depositType}</div>
+      <div class="movements__value">${mov}€</div>
     </div>
-    `
-    containerMovements.insertAdjacentHTML('afterbegin', htmlElement)
+    `;
+    containerMovements.insertAdjacentHTML('afterbegin', htmlElement);
   });
 };
-
 displayMovements(account1.movements);
+
+const calcDisplayBalcance = function (movements) {
+  const balance = movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${balance}€`;
+};
+calcDisplayBalcance(account1.movements);
+
+const calcDisplaySummary = function (arr) {
+  const incomes = arr.filter(mov => mov > 0).reduce((acc, mov) => acc + mov, 0);
+  labelSumIn.innerHTML = `${incomes}€`;
+
+  const out = arr.filter(mov => mov < 0).reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.innerHTML = `${Math.abs(out)}`;
+
+  const interest = arr.filter(mov => mov > 0).map(deposit => (deposit * 1.2) / 100).filter(interest => interest >= 1).reduce((acc, interest) => acc + interest, 0);
+  labelSumInterest.innerHTML = `${interest}€`
+};
+calcDisplaySummary(account1.movements);
 
 const createUserNames = function (accs) {
   accs.forEach(
@@ -88,9 +107,8 @@ const createUserNames = function (accs) {
         .join(''))
   );
 };
-
 createUserNames(accounts);
-console.log(accounts);
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
@@ -103,4 +121,12 @@ const currencies = new Map([
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
+const sum = movements.reduce((acc, curr) => acc + curr, 0);
+// console.log(sum);
+
+const max = movements.reduce(
+  (acc, mov) => (mov > acc ? mov : acc),
+  movements[0]
+);
+// console.log(max);
 /////////////////////////////////////////////////
