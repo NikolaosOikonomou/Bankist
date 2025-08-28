@@ -172,6 +172,18 @@ btnClose.addEventListener('click', function (e) {
   containerApp.style.opacity = 0;
 })
 
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+  const loanAmount = +inputLoanAmount.value;
+  if (loanAmount <= 0) return;
+  console.log(loggedInUser.movements.some(mov => mov >= (loanAmount * 20 ) / 100));
+  if (!loggedInUser.movements.some(mov => mov > (loanAmount * 20 ) / 100)) return;
+  console.log(loggedInUser);
+  loggedInUser.movements.push(loanAmount);
+  updateUI(loggedInUser);
+  inputLoanAmount.value = '';
+})
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
@@ -183,7 +195,8 @@ const currencies = new Map([
 ]);
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
-
+const lastBigMovIndex = movements.findLastIndex((mov, i) => {return Math.abs(mov) > 2000});
+// console.log(lastBigMovIndex);
 const sum = movements.reduce((acc, curr) => acc + curr, 0);
 // console.log(sum);
 
@@ -200,4 +213,4 @@ const calcAverageHumanAge = arr =>
     .reduce((acc, age, i, arr) => acc + age / arr.length, 0);
 
 const humanAge = calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]);
-console.log(humanAge);
+// console.log(humanAge);
