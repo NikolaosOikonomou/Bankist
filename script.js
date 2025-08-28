@@ -150,11 +150,26 @@ btnTransfer.addEventListener('click', function(e) {
   loggedInUser.movements.push(-amount);
 
   // Reset UI
-  inputTransferAmount.value = '';
-  inputTransferTo.value = '';
+  inputTransferAmount.value = inputTransferTo.value = '';
   updateUI(loggedInUser);
   console.log("Transfer Valid.");
   console.log(accounts);
+});
+
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+  const confirmUser = inputCloseUsername.value;
+  const confirmPin = +inputClosePin.value;
+
+  if(confirmUser !== loggedInUser.username || confirmPin !== loggedInUser.pin) return;
+
+  const onDeleteUserIndex = accounts.findIndex(account => account.username === confirmUser);
+  console.log(onDeleteUserIndex);
+  if(onDeleteUserIndex === -1) return;
+  accounts.splice(onDeleteUserIndex, 1);
+  inputCloseUsername.value = inputClosePin.value = '';
+  console.log(accounts);
+  containerApp.style.opacity = 0;
 })
 
 /////////////////////////////////////////////////
