@@ -71,7 +71,7 @@ const displayMovements = function (movements, sort = false) {
       <div class="movements__type movements__type--${depositType}">${
       i + 1
     } ${depositType}</div>
-      <div class="movements__value">${mov}€</div>
+      <div class="movements__value">${mov.toFixed(2)}€</div>
     </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', htmlElement);
@@ -80,7 +80,7 @@ const displayMovements = function (movements, sort = false) {
 
 const calcDisplayBalcance = function (account) {
   account.balance = account.movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${account.balance}€`;
+  labelBalance.textContent = `${account.balance.toFixed(2)}€`;
 };
 
 const calcDisplaySummary = function (account) {
@@ -95,7 +95,7 @@ const calcDisplaySummary = function (account) {
     .map(deposit => (deposit * account.interestRate) / 100)
     .filter(interest => interest >= 1)
     .reduce((acc, interest) => acc + interest, 0);
-  labelSumInterest.innerHTML = `${interest}€`
+  labelSumInterest.innerHTML = `${interest.toFixed(2)}€`
 };
 
 const createUserNames = function (accs) {
@@ -174,7 +174,7 @@ btnClose.addEventListener('click', function (e) {
 
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
-  const loanAmount = +inputLoanAmount.value;
+  const loanAmount = Math.floor(inputLoanAmount.value);
   if (loanAmount <= 0) return;
   console.log(loggedInUser.movements.some(mov => mov >= (loanAmount * 20 ) / 100));
   if (!loggedInUser.movements.some(mov => mov > (loanAmount * 20 ) / 100)) return;
