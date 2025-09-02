@@ -70,11 +70,13 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 const getFormattedDate = function () {
-    const now = new Date();
-    const day = now.getDay().toString().padStart(2, 0);
-    const month = (now.getMonth() + 1).toString().padStart(2, 0);
-    const dateNow = `${day}/${month}/${now.getFullYear()}, ${now.getHours()}:${now.getMinutes()}`;
-    return dateNow;
+  const now = new Date();
+  const day = now.getDay().toString().padStart(2, 0);
+  const month = (now.getMonth() + 1).toString().padStart(2, 0);
+  const hour = (now.getHours()).toString().padStart(2, 0);
+  const minutes = (now.getMinutes()).toString().padStart(2, 0);
+  const dateNow = `${day}/${month}/${now.getFullYear()}, ${hour}:${minutes}`;
+  return dateNow;
 };
 
 const displayMovements = function (account, sort = false) {
@@ -87,8 +89,8 @@ const displayMovements = function (account, sort = false) {
     const movemDate = new Date(account.movementsDates[i]);
     const day = movemDate.getDay().toString().padStart(2, 0);
     const month = (movemDate.getMonth() + 1).toString().padStart(2, 0);
-    const hour = (movemDate.getHours() + 1).toString().padStart(2, 0);
-    const minutes = (movemDate.getMinutes() + 1).toString().padStart(2, 0);
+    const hour = (movemDate.getHours()).toString().padStart(2, 0);
+    const minutes = (movemDate.getMinutes()).toString().padStart(2, 0);
     const formattedmovemDate = `${day}/${month}/${movemDate.getFullYear()}, ${hour}:${minutes}`;
     const htmlElement = `
     <div class="movements__row">
