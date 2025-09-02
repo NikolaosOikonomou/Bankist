@@ -69,16 +69,33 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const displayMovements = function (movements, sort = false) {
+const getFormattedDate = function () {
+    const now = new Date();
+    const day = now.getDay().toString().padStart(2, 0);
+    const month = (now.getMonth() + 1).toString().padStart(2, 0);
+    const dateNow = `${day}/${month}/${now.getFullYear()}, ${now.getHours()}:${now.getMinutes()}`;
+    return dateNow;
+};
+
+const displayMovements = function (account, sort = false) {
   containerMovements.innerHTML = '';
-  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  const movs = sort
+    ? account.movements.slice().sort((a, b) => a - b)
+    : account.movements;
   movs.forEach(function (mov, i) {
     const depositType = mov > 0 ? 'deposit' : 'withdrawal';
+    const movemDate = new Date(account.movementsDates[i]);
+    const day = movemDate.getDay().toString().padStart(2, 0);
+    const month = (movemDate.getMonth() + 1).toString().padStart(2, 0);
+    const hour = (movemDate.getHours() + 1).toString().padStart(2, 0);
+    const minutes = (movemDate.getMinutes() + 1).toString().padStart(2, 0);
+    const formattedmovemDate = `${day}/${month}/${movemDate.getFullYear()}, ${hour}:${minutes}`;
     const htmlElement = `
     <div class="movements__row">
       <div class="movements__type movements__type--${depositType}">${
       i + 1
     } ${depositType}</div>
+    <div class="movements__date">${formattedmovemDate}</div>
       <div class="movements__value">${mov.toFixed(2)}€</div>
     </div>
     `;
@@ -92,18 +109,22 @@ const calcDisplayBalcance = function (account) {
 };
 
 const calcDisplaySummary = function (account) {
-  const incomes = account.movements.filter(mov => mov > 0).reduce((acc, mov) => acc + mov, 0);
+  const incomes = account.movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
   labelSumIn.innerHTML = `${incomes}€`;
 
-  const out = account.movements.filter(mov => mov < 0).reduce((acc, mov) => acc + mov, 0);
-  labelSumOut.innerHTML = `${Math.abs(out)}`;
+  const out = account.movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.innerHTML = `${Math.abs(out).toFixed(2)}`;
 
   const interest = account.movements
     .filter(mov => mov > 0)
     .map(deposit => (deposit * account.interestRate) / 100)
     .filter(interest => interest >= 1)
     .reduce((acc, interest) => acc + interest, 0);
-  labelSumInterest.innerHTML = `${interest.toFixed(2)}€`
+  labelSumInterest.innerHTML = `${interest.toFixed(2)}€`;
 };
 
 const createUserNames = function (accs) {
@@ -117,14 +138,16 @@ const createUserNames = function (accs) {
   );
 };
 
-const updateUI = function(acc) {
-    displayMovements(acc.movements);
-    calcDisplayBalcance(acc);
-    calcDisplaySummary(acc);
-}
+const updateUI = function (acc) {
+  displayMovements(acc);
+  calcDisplayBalcance(acc);
+  calcDisplaySummary(acc);
+};
 
 createUserNames(accounts);
 let loggedInUser;
+
+
 // Event Hundlers
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault();
@@ -134,33 +157,41 @@ btnLogin.addEventListener('click', function (e) {
 
   if (loggedInUser?.pin === pass) {
     console.log(loggedInUser);
-    labelWelcome.textContent = `Welcome back, ${loggedInUser.owner.split(' ')[0]}!`;
+    labelWelcome.textContent = `Welcome back, ${
+      loggedInUser.owner.split(' ')[0]
+    }!`;
+    
+    const dateNow = getFormattedDate();
+    labelDate.textContent = dateNow;
     containerApp.style.opacity = 1;
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur(); //field looses focus
 
     // Update UI
     updateUI(loggedInUser);
-
   }
 });
 
-btnTransfer.addEventListener('click', function(e) {
+btnTransfer.addEventListener('click', function (e) {
   e.preventDefault();
-  console.log(accounts);
   const amount = +inputTransferAmount.value;
-  const receiverAcc = accounts.find(account => account.username === inputTransferTo.value.trim());
-  
-  if(!amount && amount > 0 || !receiverAcc) return;
-  if(amount > loggedInUser.balance || loggedInUser === receiverAcc) return;
+  const receiverAcc = accounts.find(
+    account => account.username === inputTransferTo.value.trim()
+  );
+
+  if ((!amount && amount > 0) || !receiverAcc) return;
+  if (amount > loggedInUser.balance || loggedInUser === receiverAcc) return;
 
   receiverAcc.movements.push(amount);
   loggedInUser.movements.push(-amount);
 
+  loggedInUser.movementsDates.push(new Date().toISOString()); 
+  receiverAcc.movementsDates.push(new Date().toISOString());
+
   // Reset UI
   inputTransferAmount.value = inputTransferTo.value = '';
   updateUI(loggedInUser);
-  console.log("Transfer Valid.");
+  console.log('Transfer Valid.');
   console.log(accounts);
 });
 
@@ -169,11 +200,14 @@ btnClose.addEventListener('click', function (e) {
   const confirmUser = inputCloseUsername.value;
   const confirmPin = +inputClosePin.value;
 
-  if(confirmUser !== loggedInUser.username || confirmPin !== loggedInUser.pin) return;
+  if (confirmUser !== loggedInUser.username || confirmPin !== loggedInUser.pin)
+    return;
 
-  const onDeleteUserIndex = accounts.findIndex(account => account.username === confirmUser);
+  const onDeleteUserIndex = accounts.findIndex(
+    account => account.username === confirmUser
+  );
   console.log(onDeleteUserIndex);
-  if(onDeleteUserIndex === -1) return;
+  if (onDeleteUserIndex === -1) return;
   accounts.splice(onDeleteUserIndex, 1);
   inputCloseUsername.value = inputClosePin.value = '';
   console.log(accounts);
@@ -184,10 +218,14 @@ btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
   const loanAmount = Math.floor(inputLoanAmount.value);
   if (loanAmount <= 0) return;
-  console.log(loggedInUser.movements.some(mov => mov >= (loanAmount * 20 ) / 100));
-  if (!loggedInUser.movements.some(mov => mov > (loanAmount * 20 ) / 100)) return;
+  console.log(
+    loggedInUser.movements.some(mov => mov >= (loanAmount * 20) / 100)
+  );
+  if (!loggedInUser.movements.some(mov => mov > (loanAmount * 20) / 100))
+    return;
   console.log(loggedInUser);
   loggedInUser.movements.push(loanAmount);
+  loggedInUser.movementsDates.push(new Date().toISOString());
   updateUI(loggedInUser);
   inputLoanAmount.value = '';
 });
@@ -195,6 +233,7 @@ btnLoan.addEventListener('click', function (e) {
 let isSorted = false;
 btnSort.addEventListener('click', function (e) {
   e.preventDefault();
-  displayMovements(loggedInUser.movements, !isSorted);
+  console.log(loggedInUser);
+  displayMovements(loggedInUser, !isSorted);
   isSorted = !isSorted;
 });
