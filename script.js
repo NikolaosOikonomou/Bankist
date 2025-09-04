@@ -70,13 +70,13 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 const getFormattedDate = function (now) {
-  
+  console.log(now);
   const day = now.getDay().toString().padStart(2, 0);
   const month = (now.getMonth() + 1).toString().padStart(2, 0);
   const hour = now.getHours().toString().padStart(2, 0);
   const minutes = now.getMinutes().toString().padStart(2, 0);
-  const dateNow = `${day}/${month}/${now.getFullYear()}, ${hour}:${minutes}`;
-  return dateNow;
+  const formattedDate = `${day}/${month}/${now.getFullYear()}, ${hour}:${minutes}`;
+  return formattedDate;
 };
 
 const displayMovements = function (account, sort = false) {
@@ -89,7 +89,7 @@ const displayMovements = function (account, sort = false) {
   }));
   
   const movsObj = sort
-    ? combinedMovements.toSorted((a, b) => a.amount - b.amount)
+    ? combinedMovements.sort((a, b) => a.amount - b.amount)
     : combinedMovements;
 
   movsObj.forEach(function (mov, i) {
