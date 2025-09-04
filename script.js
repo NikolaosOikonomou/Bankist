@@ -69,20 +69,29 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const getFormattedDate = function (now) {
-  const calcDaysPassed = (now, date1) => Math.round((now - date1) / (1000 * 60 * 60 * 24));
+const getFormattedDate = function (date) {
+  const calcDaysPassed = (now, date1) =>
+    Math.round((now - date1) / (1000 * 60 * 60 * 24));
 
-  const daysPassed = calcDaysPassed(new Date(), now);
-  if (daysPassed === 0) return "Today";
-  if (daysPassed === 1) return "Yesterday";
+  const daysPassed = calcDaysPassed(new Date(), date);
+  if (daysPassed === 0) return 'Today';
+  if (daysPassed === 1) return 'Yesterday';
   if (daysPassed <= 7) return `${daysPassed} days passed`;
 
-  const day = now.getDay().toString().padStart(2, 0);
-  const month = (now.getMonth() + 1).toString().padStart(2, 0);
-  const hour = now.getHours().toString().padStart(2, 0);
-  const minutes = now.getMinutes().toString().padStart(2, 0);
-  const formattedDate = `${day}/${month}/${now.getFullYear()}, ${hour}:${minutes}`;
-  return formattedDate;
+  const options = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  };
+  const local = loggedInUser.locale;
+  const localizeDate = new Intl.DateTimeFormat(local, options).format(date);
+
+  // const day = now.getDay().toString().padStart(2, 0);
+  // const month = (now.getMonth() + 1).toString().padStart(2, 0);
+  // const hour = now.getHours().toString().padStart(2, 0);
+  // const minutes = now.getMinutes().toString().padStart(2, 0);
+  // const formattedDate = `${day}/${month}/${now.getFullYear()}, ${hour}:${minutes}`;
+  return localizeDate;
 };
 
 const displayMovements = function (account, sort = false) {
@@ -93,7 +102,7 @@ const displayMovements = function (account, sort = false) {
     amount: mov,
     date: account.movementsDates.at(i),
   }));
-  
+
   const movsObj = sort
     ? combinedMovements.sort((a, b) => a.amount - b.amount)
     : combinedMovements;
@@ -157,8 +166,22 @@ const updateUI = function (acc) {
 };
 
 createUserNames(accounts);
-let loggedInUser;
+let loggedInUser = account1;
+containerApp.style.opacity = 1;
+const dateNow = getFormattedDate(new Date());
+// internationaliziation API
+const now = new Date();
+const options = {
+  hour: 'numeric',
+  minute: 'numeric',
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+  weekday: 'long',
+};
+const locale = navigator.language;
 
+labelDate.textContent = new Intl.DateTimeFormat(locale, options).format(now);
 // Event Hundlers
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault();
@@ -172,8 +195,21 @@ btnLogin.addEventListener('click', function (e) {
       loggedInUser.owner.split(' ')[0]
     }!`;
 
-    const dateNow = getFormattedDate(new Date());
-    labelDate.textContent = dateNow;
+    // const dateNow = getFormattedDate(new Date());
+    // internationaliziation API
+    const now = new Date();
+    const options = {
+      hour: 'numeric',
+      minute: 'numeric',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    };
+
+    labelDate.textContent = new Intl.DateTimeFormat(
+      loggedInUser.locale,
+      options
+    ).format();
     containerApp.style.opacity = 1;
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur(); //field looses focus
