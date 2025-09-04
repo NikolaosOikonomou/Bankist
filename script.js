@@ -69,36 +69,40 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const getFormattedDate = function () {
-  const now = new Date();
+const getFormattedDate = function (now) {
+  
   const day = now.getDay().toString().padStart(2, 0);
   const month = (now.getMonth() + 1).toString().padStart(2, 0);
-  const hour = (now.getHours()).toString().padStart(2, 0);
-  const minutes = (now.getMinutes()).toString().padStart(2, 0);
+  const hour = now.getHours().toString().padStart(2, 0);
+  const minutes = now.getMinutes().toString().padStart(2, 0);
   const dateNow = `${day}/${month}/${now.getFullYear()}, ${hour}:${minutes}`;
   return dateNow;
 };
 
 const displayMovements = function (account, sort = false) {
   containerMovements.innerHTML = '';
-  const movs = sort
-    ? account.movements.slice().sort((a, b) => a - b)
-    : account.movements;
-  movs.forEach(function (mov, i) {
-    const depositType = mov > 0 ? 'deposit' : 'withdrawal';
-    const movemDate = new Date(account.movementsDates[i]);
-    const day = movemDate.getDay().toString().padStart(2, 0);
-    const month = (movemDate.getMonth() + 1).toString().padStart(2, 0);
-    const hour = (movemDate.getHours()).toString().padStart(2, 0);
-    const minutes = (movemDate.getMinutes()).toString().padStart(2, 0);
-    const formattedmovemDate = `${day}/${month}/${movemDate.getFullYear()}, ${hour}:${minutes}`;
+
+  // create an movements object combine amount and date
+  const combinedMovements = account.movements.map((mov, i) => ({
+    amount: mov,
+    date: account.movementsDates.at(i),
+  }));
+  
+  const movsObj = sort
+    ? combinedMovements.toSorted((a, b) => a.amount - b.amount)
+    : combinedMovements;
+
+  movsObj.forEach(function (mov, i) {
+    const depositType = mov.amount > 0 ? 'deposit' : 'withdrawal';
+    const movemDate = new Date(combinedMovements[i].date);
+    const formattedmovemDate = getFormattedDate(movemDate);
     const htmlElement = `
     <div class="movements__row">
       <div class="movements__type movements__type--${depositType}">${
       i + 1
     } ${depositType}</div>
     <div class="movements__date">${formattedmovemDate}</div>
-      <div class="movements__value">${mov.toFixed(2)}€</div>
+      <div class="movements__value">${mov.amount.toFixed(2)}€</div>
     </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', htmlElement);
@@ -149,7 +153,6 @@ const updateUI = function (acc) {
 createUserNames(accounts);
 let loggedInUser;
 
-
 // Event Hundlers
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault();
@@ -162,8 +165,8 @@ btnLogin.addEventListener('click', function (e) {
     labelWelcome.textContent = `Welcome back, ${
       loggedInUser.owner.split(' ')[0]
     }!`;
-    
-    const dateNow = getFormattedDate();
+
+    const dateNow = getFormattedDate(new Date());
     labelDate.textContent = dateNow;
     containerApp.style.opacity = 1;
     inputLoginUsername.value = inputLoginPin.value = '';
@@ -187,7 +190,7 @@ btnTransfer.addEventListener('click', function (e) {
   receiverAcc.movements.push(amount);
   loggedInUser.movements.push(-amount);
 
-  loggedInUser.movementsDates.push(new Date().toISOString()); 
+  loggedInUser.movementsDates.push(new Date().toISOString());
   receiverAcc.movementsDates.push(new Date().toISOString());
 
   // Reset UI
@@ -235,7 +238,6 @@ btnLoan.addEventListener('click', function (e) {
 let isSorted = false;
 btnSort.addEventListener('click', function (e) {
   e.preventDefault();
-  console.log(loggedInUser);
   displayMovements(loggedInUser, !isSorted);
   isSorted = !isSorted;
 });
